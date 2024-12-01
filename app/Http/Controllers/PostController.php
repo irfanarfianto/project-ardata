@@ -15,24 +15,14 @@ class PostController extends Controller
     {
         // Validasi input
         $request->validate([
-            'caption' => 'nullable|string|max:1000',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'caption' => 'required_without:photo|string',
+            'photo' => 'required_without:caption|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
-        // Cek jika tidak ada caption dan foto
-        if (!$request->has('caption') && !$request->hasFile('photo')) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Caption atau foto harus diisi.',
-            ], 400);
-        }
 
         try {
             $photoPath = null;
 
-            // Jika ada foto, simpan foto
             if ($request->hasFile('photo')) {
-                // Pastikan file foto valid dan simpan di folder 'posts' pada disk public
                 $photoPath = $request->file('photo')->store('posts', 'public');
             }
 
@@ -64,7 +54,6 @@ class PostController extends Controller
     {
         $post = Post::findOrFail($postId);
 
-        // Periksa apakah pengguna yang menghapus adalah pemilik postingan
         if ($post->user_id !== auth()->id()) {
             return response()->json([
                 'status' => 403,
@@ -72,7 +61,6 @@ class PostController extends Controller
             ], 403);
         }
 
-        // Hapus foto jika ada
         if ($post->photo) {
             Storage::delete($post->photo);
         }
@@ -116,7 +104,6 @@ class PostController extends Controller
     {
         $comment = Comment::findOrFail($commentId);
 
-        // Periksa apakah pengguna yang menghapus adalah pemilik komentar
         if ($comment->user_id !== auth()->id()) {
             return response()->json([
                 'status' => 403,
