@@ -7,6 +7,18 @@ use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
+    public function show(Request $request)
+    {
+        $user = $request->user()->makeHidden(['id', 'email_verified_at']);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data profil berhasil diambil',
+            'data' => $user,
+        ]);
+    }
+
+
     // Update Nama dan Foto Profil
     public function updateProfile(Request $request)
     {

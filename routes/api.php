@@ -22,6 +22,7 @@ Route::post('/login', [AuthController::class, 'login']);
 */
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/update-profile', [ProfileController::class, 'updateProfile']);
     Route::post('/posts', [PostController::class, 'createPost']);
     Route::post('/posts/{postId}/like', [PostController::class, 'likePost']);
