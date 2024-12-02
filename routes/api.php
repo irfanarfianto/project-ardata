@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/update-profile', [ProfileController::class, 'updateProfile']);
     Route::post('/posts', [PostController::class, 'createPost']);
+    Route::post('/posts/{postId}', [PostController::class, 'updatePost']);
     Route::post('/posts/{postId}/like', [PostController::class, 'likePost']);
     Route::post('/posts/{postId}/comment', [PostController::class, 'addComment']);
     Route::post('/comments/{commentId}/reply', [PostController::class, 'replyToComment']);

@@ -16,21 +16,26 @@ class PostController extends Controller
         // Validasi input
         $request->validate([
             'caption' => 'required_without:photo|string',
-            'photo' => 'required_without:caption|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'photo' => 'required_without:caption|array|max:8',
+            'photo.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',  // Validasi untuk masing-masing file
         ]);
 
         try {
-            $photoPath = null;
+            $photoPaths = [];
 
+            // Memeriksa apakah ada file foto yang diupload
             if ($request->hasFile('photo')) {
-                $photoPath = $request->file('photo')->store('posts', 'public');
+                foreach ($request->file('photo') as $photo) {
+                    $photoPath = $photo->store('posts', 'public'); // Menyimpan foto ke folder 'posts'
+                    $photoPaths[] = Storage::url($photoPath); // Menyimpan URL foto
+                }
             }
 
             // Membuat postingan baru
             $post = Post::create([
                 'user_id' => $request->user()->id,
                 'caption' => $request->caption,
-                'photo' => $photoPath ? Storage::url($photoPath) : null,
+                'photo' => json_encode($photoPaths), // Menyimpan array URL dalam bentuk JSON
             ]);
 
             return response()->json([
@@ -46,6 +51,65 @@ class PostController extends Controller
             ], 500);
         }
     }
+
+    // Update Postingan
+    public function updatePost(Request $request, $postId)
+    {
+        $post = Post::findOrFail($postId);
+
+        // Pastikan pengguna yang sedang login adalah pemilik postingan
+        if ($post->user_id !== auth()->id()) {
+            return response()->json([
+                'status' => 403,
+                'message' => 'Anda tidak memiliki izin untuk mengupdate postingan ini.',
+            ], 403);
+        }
+
+        // Validasi input
+        $request->validate([
+            'caption' => 'nullable|string',
+            'photo' => 'nullable|array|max:8',
+            'photo.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        try {
+            $photoPaths = json_decode($post->photo, true) ?? [];
+
+            if ($request->hasFile('photo')) {
+                if (!empty($photoPaths)) {
+                    foreach ($photoPaths as $photo) {
+                        $photoPath = str_replace('/storage/', '', $photo);
+                        Storage::disk('public')->delete($photoPath);
+                    }
+                }
+                // Upload foto baru
+                $photoPaths = [];
+                foreach ($request->file('photo') as $photo) {
+                    $photoPath = $photo->store('posts', 'public');
+                    $photoPaths[] = Storage::url($photoPath);
+                }
+            }
+
+            // Perbarui postingan
+            $post->update([
+                'caption' => $request->caption ?? $post->caption,
+                'photo' => json_encode($photoPaths),
+            ]);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Postingan berhasil diupdate',
+                'data' => $post,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Gagal mengupdate postingan',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
 
 
 
