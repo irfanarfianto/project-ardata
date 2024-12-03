@@ -18,19 +18,19 @@ class UserSeeder extends Seeder
         $users = [
             [
                 'name' => 'John Doe',
-                'email' => 'johndoe@example.com',
-                'password' => 'password123', // Password yang di-hash nanti
-                'province_code' => 'JKT',  // Contoh kode provinsi
-                'city_code' => '001',      // Contoh kode kota
-                'profile_photo' => null,   // Jika tidak ada foto
+                'email' => 'johne@gmail.com',
+                'password' => 'password123',
+                'province_code' => 'JKT',
+                'city_code' => '001',
+                'profile_photo' => 'default.jpg',   // Jika tidak ada foto
             ],
             [
                 'name' => 'Jane Smith',
-                'email' => 'janesmith@example.com',
+                'email' => 'janeh@gmail.com',
                 'password' => 'password456',
                 'province_code' => 'BGR',
                 'city_code' => '002',
-                'profile_photo' => null,
+                'profile_photo' => 'default.jpg',
             ],
             // Tambahkan lebih banyak data pengguna jika diperlukan
         ];
@@ -48,8 +48,8 @@ class UserSeeder extends Seeder
 
             // Proses unggah foto profil (jika ada)
             $profilePhotoPath = null;
-            if ($userData['profile_photo']) {
-                $profilePhotoPath = $userData['profile_photo']->store('profile_photos', 'public');
+            if ($userData['profile_photo'] !== 'default.jpg') {
+                $profilePhotoPath = Storage::putFile('profile_photos', $userData['profile_photo']);
             }
 
             // Buat user baru
@@ -61,7 +61,7 @@ class UserSeeder extends Seeder
                 'city_code' => $userData['city_code'],
                 'register_number' => $registerNumber,
                 'unique_number' => $uniqueNumber,
-                'profile_photo' => $profilePhotoPath ? Storage::url($profilePhotoPath) : null,
+                'profile_photo' => $profilePhotoPath ? Storage::url($profilePhotoPath) : 'default.jpg',
             ]);
         }
     }

@@ -6,24 +6,28 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 
+
+
 /*
-|--------------------------------------------------------------------------
+|----------------------------------------------------------------------
 | Authentication Routes
-|--------------------------------------------------------------------------
+|----------------------------------------------------------------------
 */
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 /*
-|--------------------------------------------------------------------------
+|----------------------------------------------------------------------
 | Protected Routes (Requires Authentication)
-|--------------------------------------------------------------------------
+|----------------------------------------------------------------------
 */
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/update-profile', [ProfileController::class, 'updateProfile']);
+
+    // Post-related routes
     Route::post('/posts', [PostController::class, 'createPost']);
     Route::post('/posts/{postId}', [PostController::class, 'updatePost']);
     Route::post('/posts/{postId}/like', [PostController::class, 'likePost']);

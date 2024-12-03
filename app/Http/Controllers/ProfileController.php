@@ -11,11 +11,7 @@ class ProfileController extends Controller
     {
         $user = $request->user()->makeHidden(['id', 'email_verified_at']);
 
-        return response()->json([
-            'status' => 200,
-            'message' => 'Data profil berhasil diambil',
-            'data' => $user,
-        ]);
+        return response()->json($user, 200);
     }
 
 
@@ -50,11 +46,10 @@ class ProfileController extends Controller
 
             // Simpan perubahan
             $user->save();
-
             return response()->json([
                 'status' => 200,
                 'message' => 'Profil berhasil diperbarui',
-                'data' => $user,
+
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
